@@ -1,9 +1,8 @@
 version: '3.8'
 
 networks:
-  traefik_network:
-    driver: overlay
-    attachable: true
+  lab_stack_network:
+    external: true
 
 volumes:
   lab_documentation:
@@ -18,11 +17,11 @@ services:
     command:
       - --providers.docker.swarmmode
       - --api.insecure=true
-      - --providers.docker.network=traefik_network
+      - --providers.docker.network=lab_stack_network
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
-      - traefik_network
+      - lab_stack_network
     deploy:
       placement:
         constraints:
@@ -40,7 +39,7 @@ services:
       - /etc/resolv.conf:/etc/resolv.conf
       - ./dnsmasq/dnsmasq.conf:/etc/dnsmasq.conf
     networks:
-      - traefik_network
+      - lab_stack_network
     ports:
       - "53:53/tcp"
       - "53:53/udp"
@@ -71,7 +70,7 @@ services:
       - traefik.http.middlewares.ghost-middleware03.replacepathregex.replacement=$$1
       - traefik.services.ghost-service.loadbalancer.server.port=2368
     networks:
-      - traefik_network
+      - lab_stack_network
     deploy:
       placement:
         constraints:
