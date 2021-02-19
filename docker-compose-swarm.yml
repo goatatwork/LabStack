@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  traefik:
+    image: traefik:v2.3
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    command:
+      - --providers.docker.swarmmode --api.insecure=true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+  dnsmasq:
+    build:
+      context: ./dnsmasq
+      dockerfile: Dockerfile
+    image: goldfieldlab/dnsmasq:alpine3.13
+    restart: always
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - /etc/hosts:/etc/hosts
+      - /etc/resolv.conf:/etc/resolv.conf
+      - ./dnsmasq/dnsmasq.conf:/etc/dnsmasq.conf
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+    command: ["--log-facility=-"]
+    labels:
+      - traefik.enable=false
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
