@@ -7,3 +7,6 @@ Currently, those services are:
   network. All hosts in the lab network can point to the IP of the host that is
   running the stack for easy resolution of local names. This is also intended
   as a recursive resolver for any hosts in the lab.
+
+  The `docker-compose-swarm.yml` this stack can be deployed using
+  `docker stack deploy --compose-file docker-compose-swarm.yml LabStack`
