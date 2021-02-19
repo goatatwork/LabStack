@@ -1,5 +1,10 @@
 version: '3.8'
 
+networks:
+  traefik_network:
+    driver: overlay
+    attachable: true
+
 services:
   traefik:
     image: traefik:v2.3
@@ -12,6 +17,8 @@ services:
       - --api.insecure=true
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - traefik_network
     deploy:
       placement:
         constraints:
@@ -28,6 +35,8 @@ services:
       - /etc/hosts:/etc/hosts
       - /etc/resolv.conf:/etc/resolv.conf
       - ./dnsmasq/dnsmasq.conf:/etc/dnsmasq.conf
+    networks:
+      - traefik_network
     ports:
       - "53:53/tcp"
       - "53:53/udp"
