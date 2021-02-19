@@ -5,6 +5,9 @@ networks:
     driver: overlay
     attachable: true
 
+volumes:
+  lab_documentation:
+
 services:
   traefik:
     image: traefik:v2.3
@@ -43,6 +46,22 @@ services:
     command: ["--log-facility=-"]
     labels:
       - traefik.enable=false
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+  ghost:
+    image: ghost:alpine
+    environment:
+      url: "http://gibson.goldtelecom.com/documentation"
+    volumes:
+      - lab_documentation:/var/lib/ghost/content
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.ghost.rule=Host(`gibson.goldtelecom.com`) && PathPrefix(`/documentation`)
+      - traefik.services.ghost-service.loadbalancer.server.port=2368
+    networks:
+      - traefik_network
     deploy:
       placement:
         constraints:
