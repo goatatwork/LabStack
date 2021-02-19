@@ -18,6 +18,7 @@ services:
     command:
       - --providers.docker.swarmmode
       - --api.insecure=true
+      - --providers.docker.network=traefik_network
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
@@ -58,7 +59,16 @@ services:
       - lab_documentation:/var/lib/ghost/content
     labels:
       - traefik.enable=true
-      - traefik.http.routers.ghost.rule=Host(`gibson.goldtelecom.com`) && PathPrefix(`/documentation`)
+      - traefik.http.routers.ghost-router.entrypoints=http
+      - traefik.http.routers.ghost-router.rule=Host(`gibson.goldtelecom.com`) && PathPrefix(`/documentation`)
+      - traefik.http.routers.ghost-router.middlewares=ghost-middlewares
+      - traefik.http.routers.ghost-router.service=ghost-service
+      - traefik.http.middlewares.ghost-middlewares.chain.middlewares=ghost-middleware01,ghost-middleware02,ghost-middleware03
+      - traefik.http.middlewares.ghost-middleware01.stripprefix.prefixes=/documentation
+      - traefik.http.middlewares.ghost-middleware02.redirectregex.regex=^(.*)/documentation$$
+      - traefik.http.middlewares.ghost-middleware02.redirectregex.replacement=$$1/documentation/
+      - traefik.http.middlewares.ghost-middleware03.replacepathregex.regex=^/documentation/(.*)
+      - traefik.http.middlewares.ghost-middleware03.replacepathregex.replacement=$$1
       - traefik.services.ghost-service.loadbalancer.server.port=2368
     networks:
       - traefik_network
