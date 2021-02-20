@@ -34,12 +34,6 @@ services:
     networks:
       - traefik-proxy
     deploy:
-      labels:
-        - traefik.enable=true
-        - traefik.http.routers.api.rule=Host(`gibson.goldtelecom.com`)
-        - traefik.http.routers.api.service=api@internal # Let the dashboard access the traefik api
-        - traefik.http.routers.api.service=api
-        - traefik.http.services.api.loadbalancer.server.port=8080
       placement:
         constraints:
           - node.role == manager
@@ -79,14 +73,7 @@ services:
         - traefik.enable=true
         - traefik.http.routers.ghost-router.entrypoints=web
         - traefik.http.routers.ghost-router.rule=Host(`gibson.goldtelecom.com`) && PathPrefix(`/documentation`)
-        # - traefik.http.routers.ghost-router.middlewares=ghost-middlewares
         - traefik.http.routers.ghost-router.service=ghost-service
-        # - traefik.http.middlewares.ghost-middlewares.chain.middlewares=ghost-middleware01,ghost-middleware02,ghost-middleware03
-        # - traefik.http.middlewares.ghost-middleware01.stripprefix.prefixes=/documentation
-        # - traefik.http.middlewares.ghost-middleware02.redirectregex.regex=^(.*)/documentation$$
-        # - traefik.http.middlewares.ghost-middleware02.redirectregex.replacement=$$1/documentation/
-        # - traefik.http.middlewares.ghost-middleware03.replacepathregex.regex=^/documentation/(.*)
-        # - traefik.http.middlewares.ghost-middleware03.replacepathregex.replacement=$$1
         - traefik.http.services.ghost-service.loadbalancer.server.port=2368
       placement:
         constraints:
