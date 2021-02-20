@@ -1,12 +1,17 @@
 # This is LabStack
 
 This a stack that I'm using to provide miscellaneous services in a network lab.
-Currently, those services are:
 
-- A DNS resolver. This is intended to be an easy place to name hosts on the lab
-  network. All hosts in the lab network can point to the IP of the host that is
-  running the stack for easy resolution of local names. This is also intended
-  as a recursive resolver for any hosts in the lab.
+This stack can be deployed using:
+**`docker stack deploy -c docker-compose-swarm.yml LabStack`**
 
-  The `docker-compose-swarm.yml` this stack can be deployed using
-  `docker stack deploy --compose-file docker-compose-swarm.yml LabStack`
+### What's included?
+
+- Traefik v2.3 reverse proxy to route services into the swarm.
+
+- An instance of **dnsmasq** that reads the `/etc/hosts` file of the host that
+  it's running on to provide names to the lab.
+
+- A Ghost blog. This is an instance of ghost labeled to run under the
+  `/documentation` path. It's data is held in a Docker volume named
+  `lab_documentation`.
