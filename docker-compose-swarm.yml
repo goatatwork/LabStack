@@ -1,0 +1,80 @@
+version: '3.8'
+
+networks:
+  lab-traefik-proxy:
+    external: true
+
+volumes:
+  lab_documentation:
+  letsencrypt:
+
+services:
+  traefik:
+    image: traefik:v2.3
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080" # traefik dashboard
+    command:
+      - --api.insecure=true
+      - --api.dashboard=true
+      - --api.debug=true
+      - --providers.docker=true
+      - --providers.docker.swarmmode=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=lab-traefik-proxy
+      - --entrypoints.web.address=:80
+      - --entrypoints.web-secured.address=:443
+      - --certificatesresolvers.mytlschallenge.acme.httpChallenge.entrypoint=web
+      - --certificatesresolvers.mytlschallenge.acme.email=ryantgray@gmail.com
+      - --certificatesresolvers.mytlschallenge.acme.storage=/letsencrypt/acme.json
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - letsencrypt:/letsencrypt
+    networks:
+      - lab-traefik-proxy
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+  dnsmasq:
+    build:
+      context: ./dnsmasq
+      dockerfile: Dockerfile
+    image: goldfieldlab/dnsmasq:alpine3.13
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - /etc/hosts:/etc/hosts
+      - /etc/resolv.conf:/etc/resolv.conf
+      - ./dnsmasq/dnsmasq.conf:/etc/dnsmasq.conf
+    networks:
+      - lab-traefik-proxy
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+    command: ["--log-facility=-"]
+    deploy:
+      labels:
+        - traefik.enable=false
+      placement:
+        constraints:
+          - node.role == manager
+  ghost:
+    image: ghost:alpine
+    environment:
+      url: "http://gibson.goldtelecom.com/documentation"
+    volumes:
+      - lab_documentation:/var/lib/ghost/content
+    networks:
+      - lab-traefik-proxy
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.ghost-router.entrypoints=web
+        - traefik.http.routers.ghost-router.rule=Host(`gibson.goldtelecom.com`) && PathPrefix(`/documentation`)
+        - traefik.http.routers.ghost-router.service=ghost-service
+        - traefik.http.services.ghost-service.loadbalancer.server.port=2368
+      placement:
+        constraints:
+          - node.role == manager
