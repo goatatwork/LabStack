@@ -1,7 +1,7 @@
 version: '3.8'
 
 networks:
-  traefik-proxy:
+  lab-traefik-proxy:
     external: true
 
 volumes:
@@ -22,7 +22,7 @@ services:
       - --providers.docker=true
       - --providers.docker.swarmmode=true
       - --providers.docker.exposedbydefault=false
-      - --providers.docker.network=traefik-proxy
+      - --providers.docker.network=lab-traefik-proxy
       - --entrypoints.web.address=:80
       - --entrypoints.web-secured.address=:443
       - --certificatesresolvers.mytlschallenge.acme.httpChallenge.entrypoint=web
@@ -32,7 +32,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - letsencrypt:/letsencrypt
     networks:
-      - traefik-proxy
+      - lab-traefik-proxy
     deploy:
       placement:
         constraints:
@@ -49,7 +49,7 @@ services:
       - /etc/resolv.conf:/etc/resolv.conf
       - ./dnsmasq/dnsmasq.conf:/etc/dnsmasq.conf
     networks:
-      - traefik-proxy
+      - lab-traefik-proxy
     ports:
       - "53:53/tcp"
       - "53:53/udp"
@@ -67,7 +67,7 @@ services:
     volumes:
       - lab_documentation:/var/lib/ghost/content
     networks:
-      - traefik-proxy
+      - lab-traefik-proxy
     deploy:
       labels:
         - traefik.enable=true
