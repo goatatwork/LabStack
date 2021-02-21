@@ -38,10 +38,7 @@ services:
         constraints:
           - node.role == manager
   dnsmasq:
-    build:
-      context: ./dnsmasq
-      dockerfile: Dockerfile
-    image: goldfieldlab/dnsmasq:alpine3.13
+    image: goatatwork/dnsmasq:alpine3.13
     cap_add:
       - NET_ADMIN
     volumes:
