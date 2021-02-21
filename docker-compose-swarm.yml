@@ -37,6 +37,7 @@ services:
       placement:
         constraints:
           - node.role == manager
+          - node.hostname == gibson
   dnsmasq:
     image: goatatwork/dnsmasq:alpine3.13
     cap_add:
@@ -57,6 +58,7 @@ services:
       placement:
         constraints:
           - node.role == manager
+          - node.hostname == gibson
   ghost:
     image: ghost:alpine
     environment:
@@ -75,3 +77,4 @@ services:
       placement:
         constraints:
           - node.role == manager
+          - node.hostname == gibson
